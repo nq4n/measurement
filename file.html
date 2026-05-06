@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencil Word Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ruler {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: #fff;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .pencil {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #ff6347;
+            border-radius: 3px;
+            cursor: ew-resize;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        button {
+            padding: 8px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #word-count {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .mark {
+            position: absolute;
+            width: 1px;
+            height: 20px;
+            background: #666;
+            top: 10px;
+            transform: translateX(-50%);
+        }
+
+        .label {
+            position: absolute;
+            font-size: 12px;
+            color: #666;
+            top: 32px;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .standard {
+            background: #4CAF50;
+            height: 30px;
+            width: 2px;
+        }
+        
+        /* Interactive Visualization Styles */
+        .measurement-impact {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .impact-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .visual-container {
+            position: relative;
+            height: 220px;
+            margin: 15px 0;
+            border: 1px solid #eee;
+            overflow: hidden;
+            background: #fff;
+        }
+        
+        .book {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 150px;
+            background: #3498db;
+            border-radius: 3px;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.5s ease;
+        }
+        
+        .measurement-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .facts-panel {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .fact {
+            margin: 8px 0;
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .accuracy-meter {
+            height: 10px;
+            background: #ddd;
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f44336 0%, #ffeb3b 50%, #4CAF50 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ Pencil Word Calculator</h1>
+        <p>Drag the pencil tip or enter length to calculate words</p>
+
+        <div class="ruler" id="ruler">
+            <div class="pencil" id="pencil"></div>
+        </div>
+
+        <div class="input-group">
+            <input type="number" id="length" placeholder="Length (cm)" min="1" max="20" step="0.1">
+            <button onclick="updatePencil()">Calculate</button>
+        </div>
+
+        <div id="word-count">Words: 0</div>
+        
+        <!-- Interactive Measurement Impact Visualization -->
+        <div class="measurement-impact">
+            <div class="impact-title">The Impact of Measurement Precision</div>
+            
+            <p>Adjust the measurement precision and see how it affects real-world outcomes:</p>
+            
+            <div class="visual-container" id="visual-container">
+                <div class="book" id="book">Novel</div>
+            </div>
+            
+            <div class="controls">
+                <label>Measurement Precision: <span id="precision-value">50%</span></label>
+                <input type="range" min="1" max="100" value="50" class="measurement-slider" id="precision-slider">
+            </div>
+            
+            <div class="accuracy-meter">
+                <div class="accuracy-fill" id="accuracy-fill"></div>
+            </div>
+            
+            <div class="facts-panel">
+                <div class="fact" id="fact-1">Without precise measurement, the first space shuttle would have missed the moon by 177,800 km.</div>
+                <div class="fact" id="fact-2">Buildings rely on measurements accurate to within 1/16th of an inch to ensure structural integrity.</div>
+                <div class="fact" id="fact-3">A medication dose measured incorrectly by just 0.1ml could be harmful or ineffective.</div>
+                <div class="fact" id="fact-4">GPS navigation requires atomic clocks accurate to within billionths of a second.</div>
+                <div class="fact" id="fact-5">Just 1mm of inaccuracy in semiconductor manufacturing can render entire batches of microchips useless.</div>
+                <div class="fact" id="fact-6">Artists during the Renaissance used precise measurements and proportions to create lifelike perspectives.</div>
+                <div class="fact" id="fact-7">The difference between a successful cookbook recipe and a failure can be just a few grams of ingredients.</div>
+                <div class="fact" id="fact-8">The average pencil can write approximately 45,000 words - knowing this helps writers plan their work.</div>
+                <div class="fact" id="fact-9">Without precise measurement standards, international trade of goods would be nearly impossible.</div>
+                <div class="fact" id="fact-10">Climate scientists track temperature changes to hundredths of a degree to monitor global warming trends.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WORDS_PER_CM = 45000 / 17.5;
+        const ruler = document.getElementById('ruler');
+        const pencil = document.getElementById('pencil');
+        const lengthInput = document.getElementById('length');
+
+        // Create ruler marks
+        function createRuler() {
+            // Clear existing marks
+            document.querySelectorAll('.mark, .label').forEach(el => el.remove());
+            
+            const totalCm = 20;
+            const rulerWidth = ruler.offsetWidth;
+            
+            // Add marks for each cm
+            for(let cm = 0; cm <= totalCm; cm++) {
+                const mark = document.createElement('div');
+                mark.className = 'mark';
+                mark.style.left = `${(cm / totalCm) * 100}%`;
+                
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.textContent = cm;
+                label.style.left = `${(cm / totalCm) * 100}%`;
+                
+                ruler.appendChild(mark);
+                ruler.appendChild(label);
+            }
+            
+            // Add special mark for 17.5cm (standard pencil)
+            const standardMark = document.createElement('div');
+            standardMark.className = 'mark standard';
+            standardMark.style.left = `${(17.5 / totalCm) * 100}%`;
+            
+            const standardLabel = document.createElement('div');
+            standardLabel.className = 'label';
+            standardLabel.textContent = '17.5cm';
+            standardLabel.style.left = `${(17.5 / totalCm) * 100}%`;
+            standardLabel.style.color = '#4CAF50';
+            standardLabel.style.fontWeight = 'bold';
+            
+            ruler.appendChild(standardMark);
+            ruler.appendChild(standardLabel);
+        }
+
+        // Drag functionality
+        let isDragging = false;
+
+        pencil.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault(); // Prevent text selection
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const rect = ruler.getBoundingClientRect();
+            let newWidth = e.clientX - rect.left;
+            newWidth = Math.max(0, Math.min(newWidth, rect.width));
+            
+            const cm = (newWidth / rect.width) * 20;
+            updateDisplay(cm);
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // Touch support for mobile
+        pencil.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            e.preventDefault(); // Prevent scrolling
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const rect = ruler.getBoundingClientRect();
+            let newWidth = touch.clientX - rect.left;
+            newWidth = Math.max(0, Math.min(newWidth, rect.width));
+            
+            const cm = (newWidth / rect.width) * 20;
+            updateDisplay(cm);
+            
+            e.preventDefault(); // Prevent scrolling
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Update display
+        function updateDisplay(cm) {
+            cm = parseFloat(parseFloat(cm).toFixed(1));
+            if (isNaN(cm)) cm = 1;
+            cm = Math.max(1, Math.min(cm, 20));
+
+            const percentage = (cm / 20) * 100;
+            pencil.style.width = `${percentage}%`;
+            lengthInput.value = cm;
+            updateWordCount(cm);
+        }
+
+        // Update from input
+        function updatePencil() {
+            const cm = parseFloat(lengthInput.value);
+            updateDisplay(cm);
+        }
+
+        // Word count calculation
+        function updateWordCount(cm) {
+            const words = Math.round(cm * WORDS_PER_CM);
+            const percentage = (words / 45000 * 100).toFixed(1);
+            document.getElementById('word-count').innerHTML = 
+                `Words: ${words.toLocaleString()} <small>(≈${percentage}% of standard)</small>`;
+        }
+
+        // Interactive Measurement Impact Visualization
+        const precisionSlider = document.getElementById('precision-slider');
+        const precisionValue = document.getElementById('precision-value');
+        const book = document.getElementById('book');
+        const accuracyFill = document.getElementById('accuracy-fill');
+        const visualContainer = document.getElementById('visual-container');
+        const facts = Array.from({ length: 10 }, (_, i) => document.getElementById(`fact-${i+1}`));
+        let currentFact = 0;
+        
+        precisionSlider.addEventListener('input', updateVisualization);
+        
+        function updateVisualization() {
+            const precision = precisionSlider.value;
+            precisionValue.textContent = `${precision}%`;
+            
+            // Update accuracy meter
+            accuracyFill.style.width = `${precision}%`;
+            
+            // Calculate distortion based on precision
+            const distortion = (100 - precision) / 20;
+            
+            // Update book appearance
+            book.style.transform = `translateX(-50%) skew(${distortion}deg, ${distortion/2}deg) rotate(${distortion/2}deg)`;
+            book.style.height = `${150 - distortion*3}px`;
+            book.style.width = `${120 - distortion*2}px`;
+            
+            if (precision < 30) {
+                book.style.background = '#e74c3c';
+                book.style.opacity = '0.7';
+            } else if (precision < 70) {
+                book.style.background = '#f39c12';
+                book.style.opacity = '0.85';
+            } else {
+                book.style.background = '#3498db';
+                book.style.opacity = '1';
+            }
+            
+            // Show relevant fact based on precision range
+            facts.forEach(fact => fact.style.display = 'none');
+            const factIndex = Math.floor(precision / 10);
+            facts[factIndex < 10 ? factIndex : 9].style.display = 'block';
+        }
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            createRuler();
+            const cm = parseFloat(lengthInput.value) || 17.5;
+            updateDisplay(cm);
+        });
+
+        // Initialize
+        createRuler();
+        updateDisplay(17.5); // Start with standard pencil
+        updateVisualization(); // Initialize visualization
+        
+        // Also update when input changes
+        lengthInput.addEventListener('input', updatePencil);
+    </script>
+</body>
+</html>
